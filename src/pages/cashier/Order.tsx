@@ -23,6 +23,7 @@ export default function Order() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'gcash' | 'card'>('cash');
   const [receiptOpen, setReceiptOpen] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [receiptData, setReceiptData] = useState<{
     orderId: string;
     items: CartItem[];
@@ -109,7 +110,7 @@ export default function Order() {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const total = subtotal; // No tax applied
+  const total = subtotal;
 
   const handleCheckout = async (paidAmount: number) => {
     if (cart.length === 0) {
@@ -351,12 +352,16 @@ export default function Order() {
                   <Button
                     className="w-full mt-4"
                     onClick={() => {
-                      const paid = paymentMethod === 'cash' ? Number(amountPaid) : total;
-                      if (paymentMethod === 'cash' && (isNaN(paid) || paid < total)) {
-                        toast.error('Amount paid must be equal or greater than total');
-                        return;
+                      if (paymentMethod === 'gcash') {
+                        setShowQR(true);
+                      } else {
+                        const paid = Number(amountPaid);
+                        if (isNaN(paid) || paid < total) {
+                          toast.error('Amount paid must be equal or greater than total');
+                          return;
+                        }
+                        handleCheckout(paid);
                       }
-                      handleCheckout(paid);
                     }}
                   >
                     Checkout
@@ -369,6 +374,27 @@ export default function Order() {
           </Card>
         </motion.div>
       </div>
+
+      {/* ✅ GCash QR Dialog */}
+      <Dialog open={showQR} onOpenChange={setShowQR}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Scan to Pay (GCash)</DialogTitle>
+            <DialogDescription>Please scan the QR code below to complete payment.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <img src="/src/QrImage/Qr.png" alt="GCash QR" className="w-64 h-64 object-contain border rounded-lg" />
+            <Button
+              onClick={() => {
+                setShowQR(false);
+                handleCheckout(total);
+              }}
+            >
+              Confirm Payment
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Receipt Dialog */}
       <Dialog open={receiptOpen} onOpenChange={setReceiptOpen}>
@@ -420,33 +446,34 @@ export default function Order() {
                     const blob = new Blob([html], { type: 'text/html' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `receipt-${receiptData.orderId.substring(0,8)}.html`;
+                    a.href = url;                 
+                    a.download = `receipt-${receiptData.orderId.substring(0, 8)}.html`;
                     a.click();
                     URL.revokeObjectURL(url);
-                  }}
-                >
-                  Download
-                </Button>
-                <Button
-                  onClick={() => {
-                    const html = generateReceiptHTML(receiptData, amountPaid === '' ? 0 : Number(amountPaid));
-                    const w = window.open('', '_blank');
-                    if (!w) return;
-                    w.document.write(html);
-                    w.document.close();
-                    w.focus();
-                    w.print();
-                  }}
-                >
-                  Print
-                </Button>
-                <Button variant="outline" onClick={() => setReceiptOpen(false)}>Close</Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+                    }}
+                    >
+                    Download Receipt
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const printWindow = window.open('', '_blank');
+                        if (printWindow && receiptData) {
+                          printWindow.document.write(generateReceiptHTML(receiptData, amountPaid === '' ? 0 : Number(amountPaid)));
+                          printWindow.document.close();
+                          printWindow.print();
+                        }
+                      }}
+                    >
+                    Print Receipt
+                    </Button>
+
+                    </div>
+                    </div>
+                    )}
+                    </DialogContent>
+                    </Dialog>
+                    </div>
+                    );
+                    }
