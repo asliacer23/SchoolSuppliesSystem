@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { formatCurrency } from '@/lib/format';
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -240,7 +241,7 @@ export default function Products() {
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.category}</TableCell>
-                  <TableCell>₱{product.price.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(product.price)}</TableCell>
                   <TableCell>
                     <span className={product.stock < 10 ? 'text-destructive font-semibold' : ''}>
                       {product.stock}

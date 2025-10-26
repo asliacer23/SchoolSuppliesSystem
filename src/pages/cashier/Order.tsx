@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Search, ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { formatCurrency, formatDate } from '@/lib/format';
 
 interface CartItem extends Product {
   quantity: number;
@@ -187,31 +188,31 @@ export default function Order() {
           <h1>School Supplies POS</h1>
           <div class="line"></div>
           <p>Order ID: ${data.orderId.substring(0,8)}</p>
-          <p>Date: ${new Date().toLocaleString()}</p>
+          <p>Date: ${formatDate(new Date())}</p>
           <p>Payment: ${data.paymentMethod.toUpperCase()}</p>
           <div class="line"></div>
           ${data.items.map(item => `
             <div class="item">
               <span>${item.name} x${item.quantity}</span>
-              <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+                <span>${formatCurrency(item.price * item.quantity)}</span>
             </div>
           `).join('')}
           <div class="line"></div>
           <div class="item">
             <span>Subtotal:</span>
-            <span>₱${data.subtotal.toFixed(2)}</span>
+          <span>${formatCurrency(data.subtotal)}</span>
           </div>
           <div class="item">
             <span>Total:</span>
-            <span>₱${data.total.toFixed(2)}</span>
+          <span>${formatCurrency(data.total)}</span>
           </div>
           <div class="item">
             <span>Amount Paid:</span>
-            <span>₱${paidAmount.toFixed(2)}</span>
+          <span>${formatCurrency(paidAmount)}</span>
           </div>
           <div class="item total">
             <span>Change:</span>
-            <span>₱${change.toFixed(2)}</span>
+          <span>${formatCurrency(change)}</span>
           </div>
           <div class="line"></div>
           <p style="text-align: center;">Thank you for your purchase!</p>
@@ -266,11 +267,11 @@ export default function Order() {
                     <CardDescription>{product.category}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold">₱{product.price.toFixed(2)}</span>
-                      <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
-                    </div>
-                  </CardContent>
+                      <div className="flex justify-between items-center">
+                        <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
+                        <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
+                      </div>
+                    </CardContent>
                 </Card>
               </motion.div>
             ))}
@@ -294,7 +295,7 @@ export default function Order() {
                   <div key={item.id} className="flex items-center space-x-2 p-2 border rounded">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">₱{item.price.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(item.price)}</p>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Button variant="outline" size="icon" className="h-6 w-6"
@@ -320,11 +321,11 @@ export default function Order() {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal:</span>
-                      <span>₱{subtotal.toFixed(2)}</span>
+                      <span>{formatCurrency(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total:</span>
-                      <span>₱{total.toFixed(2)}</span>
+                      <span>{formatCurrency(total)}</span>
                     </div>
                     <div className="pt-2 space-y-2">
                       <label className="text-sm font-medium">Payment Method</label>
@@ -407,34 +408,34 @@ export default function Order() {
             <div className="space-y-4 py-2">
               <div className="text-sm">
                 <div>Order ID: {receiptData.orderId.substring(0, 8)}</div>
-                <div>Date: {new Date().toLocaleString()}</div>
+                <div>Date: {formatDate(new Date())}</div>
                 <div>Payment: {receiptData.paymentMethod.toUpperCase()}</div>
               </div>
               <div className="space-y-2">
                 {receiptData.items.map(item => (
                   <div key={item.id} className="flex justify-between">
                     <div className="text-sm">{item.name} x{item.quantity}</div>
-                    <div className="text-sm">₱{(item.price * item.quantity).toFixed(2)}</div>
+                    <div className="text-sm">{formatCurrency(item.price * item.quantity)}</div>
                   </div>
                 ))}
               </div>
               <div className="border-t pt-2 space-y-1">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>₱{receiptData.subtotal.toFixed(2)}</span>
+                  <span>{formatCurrency(receiptData.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total:</span>
-                  <span className="font-bold">₱{receiptData.total.toFixed(2)}</span>
+                  <span className="font-bold">{formatCurrency(receiptData.total)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Amount Paid:</span>
-                  <span>₱{(amountPaid || 0).toFixed(2)}</span>
+                  <span>{formatCurrency(amountPaid || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Change:</span>
                   <span className="font-medium">
-                    ₱{(typeof amountPaid === 'number' ? Math.max(0, amountPaid - receiptData.total) : 0).toFixed(2)}
+                    {formatCurrency(typeof amountPaid === 'number' ? Math.max(0, amountPaid - receiptData.total) : 0)}
                   </span>
                 </div>
               </div>

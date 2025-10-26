@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/lib/supabase';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { DollarSign, ShoppingCart, Package, AlertTriangle, Banknote } from 'lucide-react';
+import { ShoppingCart, AlertTriangle, Banknote } from 'lucide-react';
+import { formatCurrency, formatDateShort } from '@/lib/format';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -14,6 +16,7 @@ export default function Dashboard() {
   });
   const [salesData, setSalesData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
@@ -21,17 +24,14 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch orders for stats
       const { data: orders } = await supabase
         .from('orders')
         .select('total, created_at')
         .order('created_at', { ascending: false });
 
-      // Calculate stats
       const totalRevenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0;
       const totalOrders = orders?.length || 0;
 
-      // Fetch low stock products
       const { data: products } = await supabase
         .from('products')
         .select('*')
@@ -43,7 +43,6 @@ export default function Dashboard() {
         lowStockItems: products?.length || 0,
       });
 
-      // Process sales data for charts (last 7 days)
       const last7Days = Array.from({ length: 7 }, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() - (6 - i));
@@ -51,11 +50,11 @@ export default function Dashboard() {
       });
 
       const dailySales = last7Days.map(date => {
-        const dayOrders = orders?.filter(order => 
+        const dayOrders = orders?.filter(order =>
           order.created_at.startsWith(date)
         ) || [];
         return {
-          date: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
+          date: formatDateShort(new Date(date)),
           sales: dayOrders.reduce((sum, order) => sum + order.total, 0),
           orders: dayOrders.length,
         };
@@ -88,30 +87,37 @@ export default function Dashboard() {
         <p className="text-muted-foreground">Overview of your school supplies store</p>
       </motion.div>
 
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
+        {/* Total Revenue */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card>
+          <Card className="hover:shadow-lg transition-all">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
               <Banknote className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₱{stats.totalRevenue.toFixed(2)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
               <p className="text-xs text-muted-foreground">All time sales</p>
             </CardContent>
           </Card>
         </motion.div>
 
+        {/* Total Orders - Clickable */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
+          whileHover={{ scale: 1.03 }}
         >
-          <Card>
+          <Card
+            onClick={() => navigate('/admin/reports')}
+            className="cursor-pointer hover:shadow-xl transition-all border hover:border-primary/50"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -123,12 +129,17 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
+        {/* Low Stock Alert - Clickable */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
+          whileHover={{ scale: 1.03 }}
         >
-          <Card>
+          <Card
+            onClick={() => navigate('/admin/products')}
+            className="cursor-pointer hover:shadow-xl transition-all border hover:border-destructive/50"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Low Stock Alert</CardTitle>
               <AlertTriangle className="h-4 w-4 text-destructive" />
@@ -141,6 +152,7 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
+      {/* Charts */}
       <Tabs defaultValue="sales" className="space-y-4">
         <TabsList>
           <TabsTrigger value="sales">Sales Chart</TabsTrigger>
@@ -159,8 +171,8 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis dataKey="date" className="text-muted-foreground" />
                   <YAxis className="text-muted-foreground" />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'
@@ -185,8 +197,8 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis dataKey="date" className="text-muted-foreground" />
                   <YAxis className="text-muted-foreground" />
-                  <Tooltip 
-                    contentStyle={{ 
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '8px'

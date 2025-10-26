@@ -2,6 +2,7 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/lib/utils";
+import { formatCurrency } from '@/lib/format';
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
@@ -209,7 +210,19 @@ const ChartTooltipContent = React.forwardRef<
                       </div>
                       {item.value && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {item.value.toLocaleString()}
+                          {(() => {
+                            const keyLabel = (itemConfig?.label || item.name || '').toString().toLowerCase();
+                            const isMoney = /sales|revenue|total|amount|price/.test(keyLabel);
+                            if (isMoney) {
+                              return formatCurrency(Number(item.value));
+                            }
+                            // fallback: localized number for Philippines
+                            try {
+                              return Number(item.value).toLocaleString('en-PH');
+                            } catch (e) {
+                              return String(item.value);
+                            }
+                          })()}
                         </span>
                       )}
                     </div>

@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 import Login from '@/pages/Login';
 import Unauthorized from '@/pages/Unauthorized';
+import Showcase from '@/pages/Showcase';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import Dashboard from '@/pages/admin/Dashboard';
 import Products from '@/pages/admin/Products';
@@ -44,8 +45,8 @@ function App() {
                 <Route index element={<Order />} />
               </Route>
 
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<Showcase />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
           <Toaster />
