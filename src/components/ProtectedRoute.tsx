@@ -22,8 +22,17 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
+  // If a route requires specific roles, ensure the user has a role and it's allowed.
+  // If role is missing, force the user to login again (session may be invalid or profile missing).
+  if (allowedRoles) {
+    if (!role) {
+      console.debug('[ProtectedRoute] user has no role, redirecting to login');
+      return <Navigate to="/login" replace />;
+    }
+    if (!allowedRoles.includes(role)) {
+      console.debug('[ProtectedRoute] user role not allowed, redirecting to unauthorized', role);
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   return <>{children}</>;

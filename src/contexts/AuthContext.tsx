@@ -20,18 +20,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.debug('[Auth] initial session:', session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
       } else {
         setLoading(false);
       }
+    }).catch((err) => {
+      console.error('[Auth] getSession error:', err);
+      setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.debug('[Auth] onAuthStateChange event:', event, 'session:', session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
@@ -52,7 +57,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Auth] fetchUserRole error:', error);
+        throw error;
+      }
+      console.debug('[Auth] fetchUserRole data:', data);
       setRole(data?.role as UserRole);
     } catch (error) {
       console.error('Error fetching user role:', error);
@@ -68,8 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      console.debug('[Auth] signOut successful');
+    } catch (err) {
+      console.error('[Auth] signOut error:', err);
+      throw err;
+    }
   };
 
   return (
