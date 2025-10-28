@@ -38,6 +38,25 @@ export default function Login() {
     }
   };
 
+  const handleForgotPassword = async () => {
+  if (!email) {
+    toast.error('Please enter your email to reset your password.');
+    return;
+  }
+
+  try {
+    const { supabase } = await import('@/lib/supabase'); // Import client dynamically
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) throw error;
+    toast.success('Password reset email sent! Please check your inbox.');
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to send password reset email.');
+  }
+};
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background via-muted to-background p-4 relative overflow-hidden">
       {/* ✨ Animated background orbs */}
@@ -106,14 +125,22 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                {/* 💡 Forgot Password Button */}
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-primary hover:underline hover:text-primary/80 transition"
+                  >
+                    Forgot password?
                   </button>
                 </div>
               </div>
+
 
               <Button
                 type="submit"

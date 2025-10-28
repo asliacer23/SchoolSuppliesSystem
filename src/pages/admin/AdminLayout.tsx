@@ -25,6 +25,7 @@ export default function AdminLayout() {
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Reports', href: '/admin/reports', icon: FileText },
+  
   ];
 
   const handleSignOut = async () => {

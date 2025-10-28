@@ -12,8 +12,10 @@ import AdminLayout from '@/pages/admin/AdminLayout';
 import Dashboard from '@/pages/admin/Dashboard';
 import Products from '@/pages/admin/Products';
 import Reports from '@/pages/admin/Reports';
+import Users from '@/pages/admin/Users';
 import CashierLayout from '@/pages/cashier/CashierLayout';
 import Order from '@/pages/cashier/Order';
+import ResetPassword from '@/pages/cashier/ResetPassword'; // ✅ added here
 
 const queryClient = new QueryClient();
 
@@ -25,23 +27,30 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ new route */}
               <Route path="/unauthorized" element={<Unauthorized />} />
               
-              <Route path="/admin" element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }>
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
                 <Route index element={<Dashboard />} />
                 <Route path="products" element={<Products />} />
                 <Route path="reports" element={<Reports />} />
               </Route>
 
-              <Route path="/cashier" element={
-                <ProtectedRoute allowedRoles={['cashier']}>
-                  <CashierLayout />
-                </ProtectedRoute>
-              }>
+              <Route
+                path="/cashier"
+                element={
+                  <ProtectedRoute allowedRoles={['cashier']}>
+                    <CashierLayout />
+                  </ProtectedRoute>
+                }
+              >
                 <Route index element={<Order />} />
               </Route>
 
